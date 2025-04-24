@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getDbConnection } from "@/lib/db"; // ajuste o caminho conforme sua estrutura
 
 const formSchema = z.object({
   nomeCompleto: z.string().min(3),
@@ -30,11 +28,50 @@ export async function POST(req: Request) {
   }
 
   try {
-    const usuario = await prisma.usuario.create({ data: parsed.data });
-    return NextResponse.json(usuario);
-  } catch {
+    const db = await getDbConnection();
+
+    const {
+      nomeCompleto,
+      email,
+      telefone,
+      dataNascimento,
+      cpf,
+      endereco,
+      cidade,
+      estado,
+      profissao,
+      salario,
+      aceitaTermos,
+    } = parsed.data;
+
+    await db
+      .request()
+      .input("nomeCompleto", nomeCompleto)
+      .input("email", email)
+      .input("telefone", telefone)
+      .input("dataNascimento", dataNascimento)
+      .input("cpf", cpf)
+      .input("endereco", endereco)
+      .input("cidade", cidade)
+      .input("estado", estado)
+      .input("profissao", profissao)
+      .input("salario", salario)
+      .input("aceitaTermos", aceitaTermos).query(`
+        INSERT INTO Usuarios (
+          nomeCompleto, email, telefone, dataNascimento, cpf, endereco,
+          cidade, estado, profissao, salario, aceitaTermos
+        )
+        VALUES (
+          @nomeCompleto, @email, @telefone, @dataNascimento, @cpf, @endereco,
+          @cidade, @estado, @profissao, @salario, @aceitaTermos
+        )
+      `);
+
+    return NextResponse.json({ message: "Dados salvos com sucesso" });
+  } catch (error) {
+    console.error("Erro ao salvar no banco:", error);
     return NextResponse.json(
-      { error: "Erro ao salvar no banco" },
+      { error: "Erro interno ao salvar no banco" },
       { status: 500 }
     );
   }
