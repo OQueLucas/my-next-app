@@ -14,13 +14,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const hasError = helperText.length > 0;
 
     const baseClasses =
-      "p-4 rounded-lg border text-black placeholder-gray-700 focus:outline-none focus:border-lime-600";
+      "p-4 rounded-lg border placeholder-gray-700 focus:outline-none focus:border-lime-600";
     const errorClasses = hasError ? "border-red-500" : "border-gray-300";
 
     return (
       <div className="flex flex-col w-full">
         {label && (
-          <label htmlFor={inputId} className="text-gray-800 text-base mb-1">
+          <label htmlFor={inputId} className="text-base mb-1">
             {label}
           </label>
         )}
